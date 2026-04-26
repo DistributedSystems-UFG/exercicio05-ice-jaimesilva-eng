@@ -1,15 +1,42 @@
 import sys, Ice
 import Demo
- 
+
 class PrinterI(Demo.Printer):
     def printString(self, s, current=None):
-        print(s)
+        print(f"Mensagem recebida: {s}")
 
-communicator = Ice.initialize(sys.argv) 
+    def toUpperCase(self, s, current=None):
+        return s.upper()
 
-adapter = communicator.createObjectAdapterWithEndpoints("SimpleAdapter", "default -p 11000")
-object = PrinterI()
-adapter.add(object, communicator.stringToIdentity("SimplePrinter"))
-adapter.activate()
+    def countCharacters(self, s, current=None):
+        return len(s)
 
-communicator.waitForShutdown()
+
+class CalculatorI(Demo.Calculator):
+    def add(self, a, b, current=None):
+        return a + b
+
+    def multiply(self, a, b, current=None):
+        return a * b
+
+
+with Ice.initialize(sys.argv) as communicator:
+    adapter = communicator.createObjectAdapterWithEndpoints(
+        "SimpleAdapter",
+        "default -p 11000"
+    )
+
+    printer = PrinterI()
+    calculator = CalculatorI()
+
+    adapter.add(printer, communicator.stringToIdentity("SimplePrinter"))
+    adapter.add(calculator, communicator.stringToIdentity("SimpleCalculator"))
+
+    adapter.activate()
+
+    print("Servidor Ice iniciado na porta 11000.")
+    print("Objeto Printer registrado como SimplePrinter.")
+    print("Objeto Calculator registrado como SimpleCalculator.")
+
+    communicator.waitForShutdown()
+
